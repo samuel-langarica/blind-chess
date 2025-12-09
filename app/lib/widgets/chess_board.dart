@@ -50,84 +50,39 @@ class ChessBoard extends StatelessWidget {
           aspectRatio: 1,
           child: Container(
             decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFF1a1816), width: 3),
+              borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  color: Colors.black.withOpacity(0.6),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
-            child: Column(
-              children: [
-                // Rank 8 to 1
-                for (int rankIndex = 0; rankIndex < 8; rankIndex++)
-                  Expanded(
-                    child: Row(
-                      children: [
-                        // Rank label on left
-                        SizedBox(
-                          width: 20,
-                          child: Center(
-                            child: Text(
-                              ranks[rankIndex],
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 11,
-                                color: Colors.grey[500],
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Column(
+                children: [
+                  // Rank 8 to 1
+                  for (int rankIndex = 0; rankIndex < 8; rankIndex++)
+                    Expanded(
+                      child: Row(
+                        children: [
+                          // Files a-h
+                          for (int fileIndex = 0; fileIndex < 8; fileIndex++)
+                            Expanded(
+                              child: _buildSquare(
+                                context,
+                                gameState,
+                                fileIndex,
+                                rankIndex,
                               ),
                             ),
-                          ),
-                        ),
-                        // Files a-h
-                        for (int fileIndex = 0; fileIndex < 8; fileIndex++)
-                          Expanded(
-                            child: _buildSquare(
-                              context,
-                              gameState,
-                              fileIndex,
-                              rankIndex,
-                            ),
-                          ),
-                        // Rank label on right
-                        SizedBox(
-                          width: 20,
-                          child: Center(
-                            child: Text(
-                              ranks[rankIndex],
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 11,
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                // File labels at bottom
-                Row(
-                  children: [
-                    const SizedBox(width: 20),
-                    for (int fileIndex = 0; fileIndex < 8; fileIndex++)
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            files[fileIndex],
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 11,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                        ),
+                        ],
                       ),
-                    const SizedBox(width: 20),
-                  ],
-                ),
-              ],
+                    ),
+                ],
+              ),
             ),
           ),
         );

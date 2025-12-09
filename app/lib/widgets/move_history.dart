@@ -28,41 +28,101 @@ class MoveHistory extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<GameState>(
       builder: (context, gameState, child) {
-        return Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF312e2b),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color(0xFF3d3a37), width: 1),
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Move History',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[400],
-                  letterSpacing: 0.5,
+        final moves = gameState.moveHistory;
+        if (moves.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.sports_esports_outlined,
+                  size: 64,
+                  color: Colors.grey[700],
                 ),
-              ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Text(
-                    _formatMoveHistory(gameState.moveHistory),
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
-                      fontSize: 14,
-                      color: Colors.white,
-                      height: 1.6,
-                    ),
+                const SizedBox(height: 16),
+                Text(
+                  'No moves yet',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[600],
                   ),
                 ),
+                const SizedBox(height: 8),
+                Text(
+                  'Make your first move to begin',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          itemCount: (moves.length / 2).ceil(),
+          itemBuilder: (context, index) {
+            final moveNumber = index + 1;
+            final whiteMove = moves[index * 2];
+            final blackMove = index * 2 + 1 < moves.length
+                ? moves[index * 2 + 1]
+                : null;
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2C2C2E),
+                borderRadius: BorderRadius.circular(10),
               ),
-            ],
-          ),
+              child: Row(
+                children: [
+                  // Move number
+                  SizedBox(
+                    width: 40,
+                    child: Text(
+                      '$moveNumber.',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+
+                  // White move
+                  Expanded(
+                    child: Text(
+                      whiteMove,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  ),
+
+                  // Black move
+                  if (blackMove != null)
+                    Expanded(
+                      child: Text(
+                        blackMove,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[400],
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
         );
       },
     );

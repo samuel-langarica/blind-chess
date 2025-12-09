@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/game_state.dart';
@@ -14,6 +15,7 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen> {
   final StorageService _storageService = StorageService();
+  bool _showMoveHistory = false;
 
   @override
   void initState() {
@@ -125,21 +127,9 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Blind Chess',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
-          ),
-        ),
-        backgroundColor: const Color(0xFF1a1816),
-        elevation: 0,
-        centerTitle: false,
-      ),
-      body: Consumer<GameState>(
+    return CupertinoPageScaffold(
+      backgroundColor: const Color(0xFF000000),
+      child: Consumer<GameState>(
         builder: (context, gameState, child) {
           // Save personal best when it changes
           if (gameState.consecutiveLegalMoves > 0) {
@@ -153,137 +143,273 @@ class _GameScreenState extends State<GameScreen> {
             });
           }
 
-          return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Column(
-                children: [
-                  // Stats row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildStatCard(
-                        'Legal Moves',
-                        gameState.consecutiveLegalMoves.toString(),
-                        Colors.green,
-                      ),
-                      _buildStatCard(
-                        'Personal Best',
-                        gameState.personalBest.toString(),
-                        Colors.blue,
-                      ),
-                      _buildStatCard(
-                        'Illegal',
-                        gameState.illegalAttempts.toString(),
-                        Colors.red,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
+          return Stack(
+            children: [
+              // Main content
+              SafeArea(
+                child: Column(
+                  children: [
+                    // Top bar with back button and stats
+                    _buildTopBar(gameState),
 
-                  // Chess board
-                  Expanded(
-                    flex: 3,
-                    child: Center(
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: ChessBoard(),
+                    // Chess board - takes most of the screen
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Center(
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: ChessBoard(),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
 
-                  // Move history
-                  Expanded(
-                    flex: 2,
-                    child: MoveHistory(),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Control buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: gameState.isGameOver ? null : _showNewGameDialog,
-                        icon: const Icon(Icons.refresh, size: 18),
-                        label: const Text('New Game'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3d3a37),
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: gameState.isGameOver
-                            ? null
-                            : () => context.read<GameState>().togglePieceVisibility(),
-                        icon: Icon(
-                          gameState.isPeeking
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                          size: 18,
-                        ),
-                        label: Text(
-                          gameState.isPeeking ? 'Hide' : 'Show',
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: gameState.isPeeking
-                              ? const Color(0xFF81b64c)
-                              : const Color(0xFF769656),
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: gameState.isGameOver ? null : _showResignDialog,
-                        icon: const Icon(Icons.flag, size: 18),
-                        label: const Text('Resign'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFc23b22),
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    // Bottom controls
+                    _buildBottomControls(gameState),
+                  ],
+                ),
               ),
-            ),
+
+              // Move history overlay
+              if (_showMoveHistory)
+                GestureDetector(
+                  onTap: () => setState(() => _showMoveHistory = false),
+                  child: Container(
+                    color: Colors.black.withOpacity(0.5),
+                  ),
+                ),
+              if (_showMoveHistory)
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: _buildMoveHistorySheet(gameState),
+                ),
+            ],
           );
         },
       ),
     );
   }
 
-  Widget _buildStatCard(String label, String value, Color color) {
-    return Expanded(
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey[400],
-                  letterSpacing: 0.5,
+  Widget _buildTopBar(GameState gameState) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      child: Row(
+        children: [
+          // Back button
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Icon(
+              CupertinoIcons.back,
+              color: Colors.white,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // Stats - compact
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildCompactStat(
+                  'Legal',
+                  gameState.consecutiveLegalMoves.toString(),
+                  const Color(0xFF81b64c),
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: color,
+                _buildCompactStat(
+                  'Best',
+                  gameState.personalBest.toString(),
+                  const Color(0xFF4A9DFF),
                 ),
-              ),
-            ],
+                _buildCompactStat(
+                  'Illegal',
+                  gameState.illegalAttempts.toString(),
+                  const Color(0xFFFF453A),
+                ),
+              ],
+            ),
+          ),
+
+          // New game button
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: gameState.isGameOver ? null : _showNewGameDialog,
+            child: Icon(
+              CupertinoIcons.refresh_thick,
+              color: gameState.isGameOver ? Colors.grey[800] : Colors.white,
+              size: 24,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactStat(String label, String value, Color color) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: color,
           ),
         ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[600],
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBottomControls(GameState gameState) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Resign button
+          _buildIconButton(
+            icon: CupertinoIcons.flag_fill,
+            label: 'Resign',
+            color: const Color(0xFFFF453A),
+            onPressed: gameState.isGameOver ? null : _showResignDialog,
+          ),
+
+          // Move history button
+          _buildIconButton(
+            icon: CupertinoIcons.list_bullet,
+            label: 'Moves',
+            color: const Color(0xFF4A9DFF),
+            onPressed: () => setState(() => _showMoveHistory = !_showMoveHistory),
+          ),
+
+          // Toggle visibility button
+          _buildIconButton(
+            icon: gameState.isPeeking
+                ? CupertinoIcons.eye_slash_fill
+                : CupertinoIcons.eye_fill,
+            label: gameState.isPeeking ? 'Hide' : 'Show',
+            color: gameState.isPeeking
+                ? const Color(0xFFFF9F0A)
+                : const Color(0xFF81b64c),
+            onPressed: gameState.isGameOver
+                ? null
+                : () => context.read<GameState>().togglePieceVisibility(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIconButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback? onPressed,
+  }) {
+    final isEnabled = onPressed != null;
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      onPressed: onPressed,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: isEnabled ? color.withOpacity(0.15) : Colors.grey[900],
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isEnabled ? color.withOpacity(0.3) : Colors.grey[800]!,
+                width: 1.5,
+              ),
+            ),
+            child: Icon(
+              icon,
+              color: isEnabled ? color : Colors.grey[700],
+              size: 26,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: isEnabled ? Colors.grey[400] : Colors.grey[700],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMoveHistorySheet(GameState gameState) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.6,
+      decoration: const BoxDecoration(
+        color: Color(0xFF1C1C1E),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          // Handle bar
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 12),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey[700],
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+
+          // Title
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Move History',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => setState(() => _showMoveHistory = false),
+                  child: Icon(
+                    CupertinoIcons.xmark_circle_fill,
+                    color: Colors.grey[600],
+                    size: 28,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Move history content
+          Expanded(
+            child: MoveHistory(),
+          ),
+        ],
       ),
     );
   }

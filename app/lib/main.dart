@@ -1,9 +1,21 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'models/game_state.dart';
-import 'screens/game_screen.dart';
+import 'screens/main_menu_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Set system UI overlay style for iOS look
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.light,
+    ),
+  );
+
   runApp(const BlindChessApp());
 }
 
@@ -14,47 +26,21 @@ class BlindChessApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => GameState(),
-      child: MaterialApp(
+      child: const CupertinoApp(
         title: 'Blind Chess',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData.dark().copyWith(
-          scaffoldBackgroundColor: const Color(0xFF262421),
-          colorScheme: ColorScheme.dark(
-            primary: const Color(0xFF81b64c),
-            secondary: const Color(0xFF769656),
-            surface: const Color(0xFF312e2b),
-            background: const Color(0xFF262421),
-          ),
-          cardTheme: CardThemeData(
-            color: const Color(0xFF312e2b),
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+        theme: CupertinoThemeData(
+          brightness: Brightness.dark,
+          primaryColor: Color(0xFF81b64c),
+          scaffoldBackgroundColor: Color(0xFF000000),
+          textTheme: CupertinoTextThemeData(
+            textStyle: TextStyle(
+              fontFamily: '.SF Pro Text',
+              color: CupertinoColors.white,
             ),
           ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-              elevation: 2,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ),
-          ),
-          dialogTheme: DialogThemeData(
-            backgroundColor: const Color(0xFF312e2b),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          textButtonTheme: TextButtonThemeData(
-            style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF81b64c),
-            ),
-          ),
-          useMaterial3: true,
         ),
-        home: const GameScreen(),
+        home: MainMenuScreen(),
       ),
     );
   }
