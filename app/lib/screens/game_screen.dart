@@ -127,8 +127,17 @@ class _GameScreenState extends State<GameScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Blind Chess'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text(
+          'Blind Chess',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        backgroundColor: const Color(0xFF1a1816),
+        elevation: 0,
+        centerTitle: false,
       ),
       body: Consumer<GameState>(
         builder: (context, gameState, child) {
@@ -146,12 +155,12 @@ class _GameScreenState extends State<GameScreen> {
 
           return SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Column(
                 children: [
                   // Stats row
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       _buildStatCard(
                         'Legal Moves',
@@ -197,8 +206,12 @@ class _GameScreenState extends State<GameScreen> {
                     children: [
                       ElevatedButton.icon(
                         onPressed: gameState.isGameOver ? null : _showNewGameDialog,
-                        icon: const Icon(Icons.refresh),
+                        icon: const Icon(Icons.refresh, size: 18),
                         label: const Text('New Game'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF3d3a37),
+                          foregroundColor: Colors.white,
+                        ),
                       ),
                       ElevatedButton.icon(
                         onPressed: gameState.isGameOver
@@ -208,23 +221,24 @@ class _GameScreenState extends State<GameScreen> {
                           gameState.isPeeking
                               ? Icons.visibility_off
                               : Icons.visibility,
+                          size: 18,
                         ),
                         label: Text(
                           gameState.isPeeking ? 'Hide' : 'Show',
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: gameState.isPeeking
-                              ? Colors.blue
-                              : Colors.orange,
+                              ? const Color(0xFF81b64c)
+                              : const Color(0xFF769656),
                           foregroundColor: Colors.white,
                         ),
                       ),
                       ElevatedButton.icon(
                         onPressed: gameState.isGameOver ? null : _showResignDialog,
-                        icon: const Icon(Icons.flag),
+                        icon: const Icon(Icons.flag, size: 18),
                         label: const Text('Resign'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
+                          backgroundColor: const Color(0xFFc23b22),
                           foregroundColor: Colors.white,
                         ),
                       ),
@@ -242,23 +256,27 @@ class _GameScreenState extends State<GameScreen> {
   Widget _buildStatCard(String label, String value, Color color) {
     return Expanded(
       child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[400],
+                  letterSpacing: 0.5,
                 ),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Text(
                 value,
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: color,
                 ),

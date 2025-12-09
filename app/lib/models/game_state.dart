@@ -11,6 +11,8 @@ class GameState extends ChangeNotifier {
   bool _isPeeking = false;
   bool _isGameOver = false;
   String? _gameResult;
+  String? _lastMoveFrom;
+  String? _lastMoveTo;
 
   GameState() {
     _chess = chess_lib.Chess();
@@ -27,6 +29,8 @@ class GameState extends ChangeNotifier {
   bool get isGameOver => _isGameOver;
   String? get gameResult => _gameResult;
   bool get isWhiteTurn => _chess.turn == chess_lib.Color.WHITE;
+  String? get lastMoveFrom => _lastMoveFrom;
+  String? get lastMoveTo => _lastMoveTo;
 
   void setPersonalBest(int best) {
     _personalBest = best;
@@ -93,6 +97,10 @@ class GameState extends ChangeNotifier {
     if (sanNotation != null) {
       _moveHistory.add(sanNotation);
     }
+
+    // Track last move for highlighting
+    _lastMoveFrom = from;
+    _lastMoveTo = to;
     _selectedSquare = null;
 
     // Check for game over
@@ -141,6 +149,10 @@ class GameState extends ChangeNotifier {
         _moveHistory.add(sanNotation);
       }
 
+      // Track last move for highlighting
+      _lastMoveFrom = selectedMove['from'] as String?;
+      _lastMoveTo = selectedMove['to'] as String?;
+
       // Check for game over after AI move
       if (_chess.game_over) {
         _isGameOver = true;
@@ -171,6 +183,8 @@ class GameState extends ChangeNotifier {
     _isPeeking = false;
     _isGameOver = false;
     _gameResult = null;
+    _lastMoveFrom = null;
+    _lastMoveTo = null;
     notifyListeners();
   }
 

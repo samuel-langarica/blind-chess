@@ -30,22 +30,24 @@ class MoveHistory extends StatelessWidget {
       builder: (context, gameState, child) {
         return Container(
           decoration: BoxDecoration(
-            color: Colors.grey[100],
+            color: const Color(0xFF312e2b),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey[300]!),
+            border: Border.all(color: const Color(0xFF3d3a37), width: 1),
           ),
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Move History',
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[400],
+                  letterSpacing: 0.5,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Expanded(
                 child: SingleChildScrollView(
                   child: Text(
@@ -53,6 +55,8 @@ class MoveHistory extends StatelessWidget {
                     style: const TextStyle(
                       fontFamily: 'monospace',
                       fontSize: 14,
+                      color: Colors.white,
+                      height: 1.6,
                     ),
                   ),
                 ),

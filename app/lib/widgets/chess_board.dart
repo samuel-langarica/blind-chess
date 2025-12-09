@@ -50,7 +50,14 @@ class ChessBoard extends StatelessWidget {
           aspectRatio: 1,
           child: Container(
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.black, width: 2),
+              border: Border.all(color: const Color(0xFF1a1816), width: 3),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               children: [
@@ -65,9 +72,10 @@ class ChessBoard extends StatelessWidget {
                           child: Center(
                             child: Text(
                               ranks[rankIndex],
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                                fontSize: 11,
+                                color: Colors.grey[500],
                               ),
                             ),
                           ),
@@ -88,9 +96,10 @@ class ChessBoard extends StatelessWidget {
                           child: Center(
                             child: Text(
                               ranks[rankIndex],
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                                fontSize: 11,
+                                color: Colors.grey[500],
                               ),
                             ),
                           ),
@@ -107,9 +116,10 @@ class ChessBoard extends StatelessWidget {
                         child: Center(
                           child: Text(
                             files[fileIndex],
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                              fontSize: 11,
+                              color: Colors.grey[500],
                             ),
                           ),
                         ),
@@ -134,11 +144,15 @@ class ChessBoard extends StatelessWidget {
     final squareName = _getSquareName(fileIndex, rankIndex);
     final isLight = _isLightSquare(fileIndex, rankIndex);
     final isSelected = gameState.selectedSquare == squareName;
+    final isLastMoveSquare = squareName == gameState.lastMoveFrom ||
+                             squareName == gameState.lastMoveTo;
     final piece = gameState.chess.get(squareName);
 
     Color squareColor;
     if (isSelected) {
       squareColor = selectedSquareColor;
+    } else if (isLastMoveSquare) {
+      squareColor = lastMoveColor;
     } else if (isLight) {
       squareColor = lightSquareColor;
     } else {
